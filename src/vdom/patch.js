@@ -113,12 +113,28 @@ function updateChildren(parent, oldChildren, newChildren) {
   let newEndIndex = newChildren.length -1 // 新的结尾索引
   let newEndVnode = newChildren[newEndIndex] // 新的结尾虚拟节点
 
+  // 
+  function makeIndexByKey(children) {
+    let map = {}
+    children.forEach((item, index) => {
+      map[item.key] = index
+    })
+    return map
+  }
+  let map = makeIndexByKey(oldChildren)
+
   // 新的或老的,孩子列表的 两个指针重合了 就停止while循环
   // 这里建议画图理解
   while(oldStartIndex <= oldEndIndex && newStartIndex <= newEndIndex) {
+    if(!oldStartIndex) {
+      // 处理情况5)中,引起的undefined元素, 直接跳过
+      oldStartVnode = oldChildren[++oldStartIndex]
+    } else if(!oldEndVnode) {
+      // 处理情况5)中,引起的undefined元素, 直接跳过
+      oldEndVnode = oldChildren[--oldEndVnode]
 
-    // 1) 头比头相同 新旧首指针指向的相同
-    if(isSameVnode(oldStartVnode, newStartVnode)) {
+    } else if(isSameVnode(oldStartVnode, newStartVnode)) {
+      // 1) 头比头相同 新旧首指针指向的相同
       patch(oldStartVnode, newStartVnode) // 用新的属性更新老的属性
       oldStartVnode = oldChildren[++oldStartIndex] // 把指针往后移
       newStartVnode = newChildren[++newStartIndex] // 把指针往后移
@@ -149,7 +165,21 @@ function updateChildren(parent, oldChildren, newChildren) {
     
     // 5) 两个列表 是乱序 也无复用节点
     } else {
-      
+      // 会先拿新节点的第一项 去老节点中匹配
+      let moveIndex = map[newStartVnode.key];
+      if(moveIndex == undefined) {
+        // 如果匹配不到, 直接将这个节点插入到老节点开头的前面
+        parent.insertBefore(createElm(newStartVnode), oldStartVnode.el)
+      } else {
+        // 如果能匹配到, 则直接移动老节点到当前开始指针之前
+        let moveVnode = oldChildren[moveIndex] // 要移动的老的节点
+        oldChildren[moveIndex] = undefined; // 防止移动老节点后数组塌陷
+        parent.insertBefore(moveVnode.el, oldStartVnode.el)
+        patch(moveVnode, newStartVnode) // 用新的属性更新老的属性
+      }
+      // 移动指针
+      newStartVnode = newChildren[++newStartIndex]
+      // 可能老节点中还有剩余, 则直接删除老节点中剩余的属性
     }
 
   }
@@ -167,6 +197,18 @@ function updateChildren(parent, oldChildren, newChildren) {
       // parent.appendChild(createElm(newChildren[i]))
     }
   }
+
+  // 处理 5) 两个列表是乱序的情况时, 可能老节点中还有剩余, 则直接删除老节点中剩余的属性
+  if(oldStartIndex <= oldEndIndex) {
+    for(let i = oldStartIndex; i <= oldEndIndex; i++) {
+      let child = oldChildren[i]
+      if(child != undefined) { // 剩余的有可能是移动后防止塌陷的undefined
+        parent.removeChild(child.el)
+      }
+    }
+  }
+
+  // 循环时尽量不要使用索引作为key, 可能会导致创建当前元素的所有子元素. 如,只是在最前边插入一个元素,如果key不是索引可以复用节点, 移动节点肯定比重新创建性能高
 
 }
 

@@ -26,13 +26,22 @@ let container = document.getElementById('app')
 render(oldVnode, container)
 
 // 更新操作
-// 尾比头相同
+// 
 let newVnode = h('div', {id: 'container'},
-  h('li', {style: {background: 'pink'}, key: 'd'}, 'd'),
+  h('li', {style: {background: 'pink'}, key: 'e'}, 'e'),
   h('li', {style: {background: 'blue'}, key: 'a'}, 'a'),
-  h('li', {style: {background: 'yellow'}, key: 'b'}, 'b'),
+  h('li', {style: {background: 'yellow'}, key: 'f'}, 'f'),
   h('li', {style: {background: 'red'}, key: 'c'}, 'c'),
+  h('li', {style: {background: 'red'}, key: 'n'}, 'n'),
 )
+
+// 尾比头相同
+// let newVnode = h('div', {id: 'container'},
+//   h('li', {style: {background: 'pink'}, key: 'd'}, 'd'),
+//   h('li', {style: {background: 'blue'}, key: 'a'}, 'a'),
+//   h('li', {style: {background: 'yellow'}, key: 'b'}, 'b'),
+//   h('li', {style: {background: 'red'}, key: 'c'}, 'c'),
+// )
 
 // 头比尾相同
 // let newVnode = h('div', {id: 'container'},
