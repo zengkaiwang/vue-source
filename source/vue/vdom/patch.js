@@ -4,6 +4,7 @@
 export function render(vnode, container) {
   let el = createElm(vnode);
   container.appendChild(el);
+  return el
 }
 
 // 把虚拟dom创建成真实节点, 这是是vue在操作dom
@@ -99,6 +100,8 @@ export function patch(oldVnode, newVnode) {
     }
   }
 
+  return el;
+
 }
 
 // vue最核心的代码 diff算法 双指针
@@ -126,12 +129,12 @@ function updateChildren(parent, oldChildren, newChildren) {
   // 新的或老的,孩子列表的 两个指针重合了 就停止while循环
   // 这里建议画图理解
   while(oldStartIndex <= oldEndIndex && newStartIndex <= newEndIndex) {
-    if(!oldStartIndex) {
+    if(!oldStartVnode) {
       // 处理情况5)中,引起的undefined元素, 直接跳过
       oldStartVnode = oldChildren[++oldStartIndex]
     } else if(!oldEndVnode) {
       // 处理情况5)中,引起的undefined元素, 直接跳过
-      oldEndVnode = oldChildren[--oldEndVnode]
+      oldEndVnode = oldChildren[--oldEndIndex]
 
     } else if(isSameVnode(oldStartVnode, newStartVnode)) {
       // 1) 头比头相同 新旧首指针指向的相同

@@ -1,4 +1,5 @@
-import { h, render, patch } from './vdom'
+// 该js文件配合开发vdom的
+import { h, render, patch } from '../source/vue/vdom'
 
 // let app = document.getElementById('app')
 
